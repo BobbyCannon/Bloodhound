@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>Bloodhound</id>
+        <title>Bloodhound</title>
+		<version>1.0</version>
+		<authors>Bobby Cannon</authors>
+		<description>Analytic software used to track feature usage, exceptions, and all other interesting points.</description>
+		<projectUrl>https://github.com/BobbyCannon/Bloodhound</projectUrl>
+		<iconUrl>https://raw.githubusercontent.com/BobbyCannon/Bloodhound/master/Bloodhound.png</iconUrl>
+		<tags>Bloodhound Analytics Feature Tracking Tracker Analyzer</tags>
+        <dependencies>
+		<dependency id="Newtonsoft.Json" version="8.0.2" />
+		<dependency id="Speedy" version="2.2.5818.6601" />
+		<dependency id="Microsoft.Net.Http" version="2.0.20710.0" />
+		<dependency id="System.Net.Http" version="2.0.20710.0" />
+		</dependencies>
+		<references>
+			<reference file="Bloodhound.dll" />
+		</references>
+	</metadata>
+	<files>
+		<file src="C:\Binaries\Bloodhound\bin\Bloodhound.dll" target="lib\net40" />
+        <file src="C:\Binaries\Bloodhound\bin\Bloodhound.pdb" target="lib\net40" />
+	</files>
+</package>

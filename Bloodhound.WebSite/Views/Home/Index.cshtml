@@ -1,0 +1,295 @@
+﻿@model IndexView
+<div class="ng-cloak clear" ng-controller="DashboardController">
+	<div class="row">
+		<div class="span12">
+			<h3>Dashboard</h3>
+		</div>
+		<div class="span12 text-right">
+			<label class="input">FROM:</label><input id="startDate" type="text" class="medium" />
+			<label class="input">TO:</label><input id="endDate" type="text" class="medium" />
+			<i id="refresh" class="fa fa-refresh fa-lg padding-4 margin-left-10 clickable blue" ng-click="refresh()"></i>
+		</div>
+	</div>
+	<div class="clear">
+		<div ng-widget ng-model="widget" ng-class="{ first: $first, last: $last }" ng-remove="removeWidget" ng-previous="moveWidget" ng-next="moveWidget" ng-repeat="widget in model.widgets"></div>
+		<div ng-widget ng-model="chartPreview" class="preview" ng-show="hasPreview()" ng-remove="resetPreview"></div>
+	</div>
+	<div ng-show="!showAddChart">
+		<button ng-click="showAddChart = true">Add Chart</button>
+	</div>
+	<div ng-show="showAddChart" class="clear">
+		<dl class="form margin-12">
+			<dt>Name</dt>
+			<dd>
+				<input type="text" ng-model="newChart.name" />
+			</dd>
+			<dt>Chart Size</dt>
+			<dd>
+				<select ng-model="newChart.chartSize">
+					<option ng-repeat="option in model.chartSizes">{{ option }}</option>
+				</select>
+			</dd>
+			<dt>Chart Type</dt>
+			<dd>
+				<select ng-model="newChart.chartType">
+					<option ng-repeat="option in model.chartTypes">{{ option }}</option>
+				</select>
+			</dd>
+			<dt ng-show="newChart.chartType === 'Pie' || newChart.chartType === 'Donut' || newChart.chartType === 'List'">Chart Limit</dt>
+			<dd ng-show="newChart.chartType === 'Pie' || newChart.chartType === 'Donut' || newChart.chartType === 'List'">
+				<input ng-model="newChart.chartLimit" type="number" />
+			</dd>
+			<dt>Event Type</dt>
+			<dd>
+				<select ng-model="newChart.eventType">
+					<option ng-repeat="option in model.eventTypes">{{ option }}</option>
+				</select>
+			</dd>
+			<dt>Group By</dt>
+			<dd>
+				<div style="left: 0; position: relative; top: 0;">
+					<input ng-model="newChart.groupBy" type="text" style="border-right-style: none; padding: 8px 0 8px 10px; position: absolute; width: 195px; z-index: 2;" />
+					<select ng-model="newChart.groupBy" style="position: absolute; z-index: 1">
+						<option ng-repeat="option in model.groupBy | orderBy:'toString()'">{{ option }}</option>
+					</select>
+				</div>
+			</dd>
+			<dt>Format</dt>
+			<dd>
+				<input ng-model="newChart.groupByFormat" type="text" />
+			</dd>
+			<dt>Aggregate By</dt>
+			<dd>
+				<select ng-model="newChart.aggregateBy">
+					<option ng-repeat="option in model.aggregateBy | orderBy:'toString()'">{{ option }}</option>
+				</select>
+			</dd>
+			<dt>Type</dt>
+			<dd>
+				<div style="left: 0; position: relative; top: 0;">
+					<input ng-model="newChart.aggregateType" type="text" style="border-right-style: none; padding: 8px 0 8px 10px; position: absolute; width: 195px; z-index: 2;" />
+					<select ng-model="newChart.aggregateType" style="position: absolute; z-index: 1">
+						<option ng-repeat="option in model.aggregateTypes | orderBy:'toString()'">{{ option }}</option>
+					</select>
+				</div>
+			</dd>
+			<dt>Format</dt>
+			<dd>
+				<input ng-model="newChart.aggregateByFormat" type="text" />
+			</dd>
+			<dt></dt>
+			<dd>
+				<input class="margin-right-6 blue" type="button" value="Preview" ng-click="updatePreview()" />
+				<input class="margin-right-6" type="button" value="Cancel" ng-click="resetPreview()" />
+				<input class="margin-right-6 green" type="button" value="Add" ng-show="chartPreview" ng-click="addChart()" />
+			</dd>
+		</dl>
+		<dl class="form margin-12">
+			<dt>From</dt>
+			<dd>
+				<input id="startDateOverride" type="text" />
+			</dd>
+			<dt>To</dt>
+			<dd>
+				<input id="endDateOverride" type="text" />
+			</dd>
+			<dt>Time Period</dt>
+			<dd>
+				<input ng-model="newChart.timePeriod" type="text" />
+			</dd>
+			<dt></dt>
+			<dd>
+				&nbsp;
+			</dd>
+			<dt>Filter</dt>
+			<dd>
+				<div style="left: 0; position: relative; top: 0;">
+					<input ng-model="newChartFilter.name" type="text" id="newChartFilterName" style="border-right-style: none; padding: 8px 0 8px 10px; position: absolute; width: 195px; z-index: 2;" />
+					<select ng-model="newChartFilter.name" id="newChartFilterSessionNames" style="position: absolute; z-index: 1">
+						<option ng-repeat="option in model.filterBy | orderBy:'toString()'">{{ option }}</option>
+					</select>
+				</div>
+			</dd>
+			<dt></dt>
+			<dd>
+				<select ng-model="newChartFilter.type">
+					<option ng-repeat="option in model.filterTypes | orderBy:'toString()'">{{ option }}</option>
+				</select>
+			</dd>
+			<dt></dt>
+			<dd>
+				<input type="text" ng-model="newChartFilter.value" />
+			</dd>
+			<dt></dt>
+			<dd>
+				<input class="margin-right-6 blue" type="button" value="Add Filter" ng-click="addChartFilter()" />
+			</dd>
+			<dt></dt>
+			<dd>
+				<div ng-repeat="filter in newChart.filters">
+					{{filter.name}} {{filter.type}} [{{filter.value}}"]
+					<a class="clickable" ng-click="removeChartFilter($index)">remove</a>
+				</div>
+			</dd>
+		</dl>
+	</div>
+</div>
+@section scripts
+{
+	<script type="text/javascript">
+
+		var $startPicker = $('#startDate').pickadate({ format: 'mm/dd/yyyy' }).pickadate('picker');
+		var $endPicker = $('#endDate').pickadate({ format: 'mm/dd/yyyy', max: new Date() }).pickadate('picker');
+		var $startOverridePicker = $('#startDateOverride').pickadate({ format: 'mm/dd/yyyy' }).pickadate('picker');
+		var $endOverridePicker = $('#endDateOverride').pickadate({ format: 'mm/dd/yyyy', max: new Date() }).pickadate('picker');
+
+		site.controller('DashboardController', [
+			'$scope', '$http',
+			function ($scope, $http) {
+
+				'use strict';
+
+				$scope.model = @(Html.Raw(Model.ToJson()));
+				$scope.newChart = {}
+				$scope.newChartFilter = {};
+				$scope.chartPreview = undefined;
+
+				$startPicker.set({ select: Date.parse($scope.model.startDate) });
+				$endPicker.set({ select: Date.parse($scope.model.endDate) });
+
+				$scope.refresh = function () {
+					$('#refresh').removeClass('fa-nospin');
+					$('#refresh').addClass('fa-spin');
+
+					var startDate = $startPicker.get('select');
+					var endDate = $endPicker.get('select');
+
+					$http.post('/api/Data/RefreshDashboard', { startDate: startDate.obj, endDate: endDate.obj })
+						.success(function (data) {
+							$scope.model = data;
+							$('#refresh').removeClass('fa-spin');
+							$('#refresh').addClass('fa-nospin');
+						})
+						.error(function () {
+							$('#refresh').removeClass('fa-spin');
+							$('#refresh').addClass("fa-nospin");
+						});
+				};
+
+				$scope.selectFilterName = function () {
+					$('#newChartFilterName').val($('#newChartFilterEventNames').val());
+					$('#newChartFilterName').focus();
+				};
+
+				$scope.addChartFilter = function () {
+					$scope.newChart.filters.push(jQuery.extend({}, $scope.newChartFilter));
+					$scope.resetFilter();
+				};
+
+				$scope.removeChartFilter = function (index) {
+					$scope.newChart.filters.splice(index, 1);
+				};
+
+				$scope.hasPreview = function () {
+					return $scope.chartPreview !== undefined && $scope.chartPreview !== null;
+				};
+
+				$scope.updatePreview = function () {
+					var startFilter = $startPicker.get('select', 'mm/dd/yyyy');
+					var endFilter = $endPicker.get('select', 'mm/dd/yyyy');
+					$scope.newChart.startDate = $startOverridePicker.get('select', 'mm/dd/yyyy');
+					$scope.newChart.endDate = $endOverridePicker.get('select', 'mm/dd/yyyy');
+
+					$scope.chartPreview = $http.post('/api/Data/GetWidgetPreview?startDate=' + startFilter + '&endDate=' + endFilter, $scope.newChart)
+						.success(function (data) {
+							console.log(data);
+							$scope.chartPreview = data;
+						})
+						.error(function (error) {
+							console.log(error);
+						});
+				};
+
+				$scope.resetPreview = function () {
+					$scope.chartPreview = undefined;
+					$scope.newChart.name = '';
+					$scope.newChart.chartLimit = 5;
+					$scope.newChart.chartSize = 'Small';
+					$scope.newChart.chartType = 'Pie';
+					$scope.newChart.eventType = 'Session';
+					$scope.newChart.groupBy = 'Date';
+					$scope.newChart.groupByFormat = '';
+					$scope.newChart.aggregateBy = 'Count';
+					$scope.newChart.aggregateByFormat = '';
+					$scope.newChart.aggregateType = '';
+					$scope.newChart.startDate = '';
+					$scope.newChart.endDate = '';
+					$scope.newChart.timePeriod = '';
+					$scope.newChart.filters = [];
+
+					$startOverridePicker.clear();
+					$endOverridePicker.clear();
+
+					$scope.resetFilter();
+					$scope.showAddChart = false;
+				};
+
+				$scope.resetFilter = function () {
+					$scope.newChartFilter.name = '';
+					$scope.newChartFilter.type = 'Equals';
+					$scope.newChartFilter.value = '';
+				};
+
+				$scope.addChart = function () {
+					var startFilter = $startPicker.get('select', 'mm/dd/yyyy');
+					var endFilter = $endPicker.get('select', 'mm/dd/yyyy');
+					$scope.newChart.startDate = $startOverridePicker.get('select', 'mm/dd/yyyy');
+					$scope.newChart.endDate = $endOverridePicker.get('select', 'mm/dd/yyyy');
+
+					$scope.chartPreview = $http.post('/api/Data/AddWidget?startDate=' + startFilter + '&endDate=' + endFilter, $scope.newChart)
+						.success(function (data) {
+							$scope.model.widgets.push(data);
+							$scope.resetPreview();
+						})
+						.error(function (error) {
+							console.log(error);
+						});
+				};
+
+				$scope.moveWidget = function (data, direction) {
+					var index = $scope.model.widgets.indexOf(data);
+					if (direction === 'previous' && index === 0) {
+						return;
+					} else if (direction === 'next' && index === $scope.model.widgets.length - 1) {
+						return;
+					}
+
+					$http.post('/api/Data/MoveWidget?id=' + data.id + '&direction=' + direction)
+						.success(function () {
+							if (direction === 'up') {
+								$scope.model.widgets.move(index, index - 1);
+							} else {
+								$scope.model.widgets.move(index, index + 1);
+							}
+						})
+						.error(function (error) {
+							console.log(error);
+						});
+				};
+
+				$scope.removeWidget = function (data) {
+					$http.post('/api/Data/RemoveWidget/' + data.id)
+						.success(function () {
+							$scope.model.widgets.splice($scope.model.widgets.indexOf(data), 1);
+						})
+						.error(function (error) {
+							console.log(error);
+						});
+				};
+
+				$scope.resetPreview();
+			}
+		]);
+
+	</script>
+}

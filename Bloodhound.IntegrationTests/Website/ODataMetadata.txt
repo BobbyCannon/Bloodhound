@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices m:DataServiceVersion="3.0" m:MaxDataServiceVersion="3.0" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+    <Schema Namespace="Bloodhound.Models" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <EntityType Name="Event">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="CompletedOn" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="CreatedOn" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="ElapsedTicks" Type="Edm.Int64" Nullable="false" />
+        <Property Name="ElapsedTime" Type="Edm.Time" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" />
+        <Property Name="ParentId" Type="Edm.Int32" />
+        <Property Name="SessionId" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Type" Type="Edm.String" Nullable="false" />
+        <Property Name="UniqueId" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <NavigationProperty Name="Children" Relationship="Bloodhound.Models.Bloodhound_Models_Event_Children_Bloodhound_Models_Event_ChildrenPartner" ToRole="Children" FromRole="ChildrenPartner" />
+        <NavigationProperty Name="Parent" Relationship="Bloodhound.Models.Bloodhound_Models_Event_Parent_Bloodhound_Models_Event_ParentPartner" ToRole="Parent" FromRole="ParentPartner" />
+        <NavigationProperty Name="Values" Relationship="Bloodhound.Models.Bloodhound_Models_Event_Values_Bloodhound_Models_EventValue_ValuesPartner" ToRole="Values" FromRole="ValuesPartner" />
+      </EntityType>
+      <EntityType Name="EventValue">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="EventId" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" />
+        <Property Name="Value" Type="Edm.String" />
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <NavigationProperty Name="Event" Relationship="Bloodhound.Models.Bloodhound_Models_EventValue_Event_Bloodhound_Models_Event_EventPartner" ToRole="Event" FromRole="EventPartner" />
+      </EntityType>
+      <Association Name="Bloodhound_Models_Event_Children_Bloodhound_Models_Event_ChildrenPartner">
+        <End Type="Bloodhound.Models.Event" Role="Children" Multiplicity="*" />
+        <End Type="Bloodhound.Models.Event" Role="ChildrenPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="Bloodhound_Models_Event_Parent_Bloodhound_Models_Event_ParentPartner">
+        <End Type="Bloodhound.Models.Event" Role="Parent" Multiplicity="0..1" />
+        <End Type="Bloodhound.Models.Event" Role="ParentPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="Bloodhound_Models_Event_Values_Bloodhound_Models_EventValue_ValuesPartner">
+        <End Type="Bloodhound.Models.EventValue" Role="Values" Multiplicity="*" />
+        <End Type="Bloodhound.Models.Event" Role="ValuesPartner" Multiplicity="0..1" />
+      </Association>
+      <Association Name="Bloodhound_Models_EventValue_Event_Bloodhound_Models_Event_EventPartner">
+        <End Type="Bloodhound.Models.Event" Role="Event" Multiplicity="0..1" />
+        <End Type="Bloodhound.Models.EventValue" Role="EventPartner" Multiplicity="0..1" />
+        <ReferentialConstraint>
+          <Principal Role="Event">
+            <PropertyRef Name="Id" />
+          </Principal>
+          <Dependent Role="EventPartner">
+            <PropertyRef Name="EventId" />
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+    </Schema>
+    <Schema Namespace="Default" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <EntityContainer Name="Container" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="Events" EntityType="Bloodhound.Models.Event" />
+        <EntitySet Name="EventValues" EntityType="Bloodhound.Models.EventValue" />
+        <AssociationSet Name="Bloodhound_Models_Event_Children_Bloodhound_Models_Event_ChildrenPartnerSet" Association="Bloodhound.Models.Bloodhound_Models_Event_Children_Bloodhound_Models_Event_ChildrenPartner">
+          <End Role="ChildrenPartner" EntitySet="Events" />
+          <End Role="Children" EntitySet="Events" />
+        </AssociationSet>
+        <AssociationSet Name="Bloodhound_Models_Event_Parent_Bloodhound_Models_Event_ParentPartnerSet" Association="Bloodhound.Models.Bloodhound_Models_Event_Parent_Bloodhound_Models_Event_ParentPartner">
+          <End Role="ParentPartner" EntitySet="Events" />
+          <End Role="Parent" EntitySet="Events" />
+        </AssociationSet>
+        <AssociationSet Name="Bloodhound_Models_Event_Values_Bloodhound_Models_EventValue_ValuesPartnerSet" Association="Bloodhound.Models.Bloodhound_Models_Event_Values_Bloodhound_Models_EventValue_ValuesPartner">
+          <End Role="ValuesPartner" EntitySet="Events" />
+          <End Role="Values" EntitySet="EventValues" />
+        </AssociationSet>
+        <AssociationSet Name="Bloodhound_Models_EventValue_Event_Bloodhound_Models_Event_EventPartnerSet" Association="Bloodhound.Models.Bloodhound_Models_EventValue_Event_Bloodhound_Models_Event_EventPartner">
+          <End Role="EventPartner" EntitySet="EventValues" />
+          <End Role="Event" EntitySet="Events" />
+        </AssociationSet>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
